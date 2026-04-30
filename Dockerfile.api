@@ -1,0 +1,20 @@
+# Use the official lightweight Python image.
+FROM python:3.11-slim
+
+# Allow statements and log messages to immediately appear in the Knative logs
+ENV PYTHONUNBUFFERED True
+
+# Copy local code to the container image.
+ENV APP_HOME /app
+WORKDIR $APP_HOME
+COPY . ./
+
+# Install production dependencies.
+RUN pip install --no-cache-dir -r api/requirements.txt
+
+# Ensure the api directory is in the python path
+ENV PYTHONPATH="${PYTHONPATH}:/app"
+
+# Run the web service on container startup.
+# Cloud Run sets the PORT environment variable.
+CMD ["sh", "-c", "uvicorn api.main:app --host 0.0.0.0 --port ${PORT:-8080}"]
