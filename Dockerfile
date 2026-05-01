@@ -17,6 +17,10 @@ RUN pnpm run build
 # Stage 2: Final Image
 FROM python:3.11-slim
 
+# Allow statements and log messages to immediately appear in the logs
+ENV PYTHONUNBUFFERED 1
+ENV NODE_ENV production
+
 # Install Node.js and Nginx
 RUN apt-get update && apt-get install -y \
     curl \

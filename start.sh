@@ -1,20 +1,28 @@
 #!/bin/bash
+set -e
 
-# Start FastAPI in the background
+# Fallback to 8080 if PORT is not set
+export PORT=${PORT:-8080}
+echo "Starting Scam Guard services on port $PORT..."
+
+# Start the Backend (FastAPI)
 echo "Starting FastAPI on port 8000..."
-uvicorn api.main:app --host 127.0.0.1 --port 8000 &
+# Use absolute path and ensure it runs in the background
+PYTHONPATH=/app uvicorn api.main:app --host 127.0.0.1 --port 8000 &
 
-# Start Next.js in the background
+# Start the Frontend (Next.js)
 echo "Starting Next.js on port 3000..."
 cd /app/web
-PORT=3000 node server.js &
+# Next.js standalone expects its own PORT env var and HOSTNAME
+HOSTNAME=127.0.0.1 PORT=3000 node server.js &
 
-# Update Nginx config with the PORT environment variable if provided by Cloud Run
-if [ -n "$PORT" ] && [ "$PORT" != "3000" ]; then
-  echo "Updating Nginx to listen on port $PORT..."
-  sed -i "s/listen 8080;/listen $PORT;/" /etc/nginx/nginx.conf
-fi
+# Wait a moment for background services to initialize
+sleep 2
+
+# Update Nginx config with the correct port from Cloud Run
+echo "Updating Nginx configuration to listen on port $PORT..."
+sed -i "s/listen 8080;/listen $PORT;/" /etc/nginx/nginx.conf
 
 # Start Nginx in the foreground
 echo "Starting Nginx..."
-nginx -g "daemon off;"
+exec nginx -g "daemon off;"
