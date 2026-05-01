@@ -36,9 +36,9 @@ RUN pip install --no-cache-dir -r api/requirements.txt
 # Copy Next.js standalone build
 # We place it in /app/web so start.sh can find it
 WORKDIR /app/web
-COPY --from=web-build /app/web/.next/standalone ./
-COPY --from=web-build /app/web/public ./public
-COPY --from=web-build /app/web/.next/static ./.next/static
+COPY --from=web-build /app/.next/standalone ./
+COPY --from=web-build /app/public ./public
+COPY --from=web-build /app/.next/static ./.next/static
 
 # Nginx configuration
 COPY nginx.conf /etc/nginx/nginx.conf
