@@ -50,7 +50,10 @@ COPY nginx.conf /etc/nginx/nginx.conf
 # Startup script
 WORKDIR /app
 COPY start.sh ./
-RUN chmod +x start.sh
+RUN chmod +x start.sh && \
+    mkdir -p /var/log && \
+    touch /var/log/fastapi.log /var/log/nextjs.log && \
+    chmod 666 /var/log/fastapi.log /var/log/nextjs.log
 
 # Cloud Run sets the PORT environment variable. Nginx will listen on this port.
 EXPOSE 8080
